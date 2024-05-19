@@ -88,6 +88,13 @@ modem_error_cb(struct qmi_dev *dev, void *data)
 	talloc_free(modem);
 }
 
+/**
+ *
+ * @param name an unique name also used by ubus
+ * @param device path to the device. /dev/cdc-wdm0
+ * @param qmi_over_mbim true if qmi needs to be tunneled over mbim
+ * @return 0 on success
+ */
 int
 uqmid_modem_add(const char *name, const char *device, bool qmi_over_mbim)
 {
