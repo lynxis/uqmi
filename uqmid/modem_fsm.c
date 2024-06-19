@@ -1244,7 +1244,9 @@ static const struct osmo_fsm_state modem_states[] = {
     },
     [MODEM_ST_RESYNC] = {
 	.in_event_mask = S(MODEM_EV_RX_SYNC),
-	.out_state_mask = S(MODEM_ST_GET_VERSION) | S(MODEM_ST_DESTROY),
+	.out_state_mask = S(MODEM_ST_GET_VERSION)
+			  | S(MODEM_ST_FAILED)
+			  | S(MODEM_ST_DESTROY),
 	.name = "RESYNC",
 	.action = modem_st_resync,
 	.onenter = modem_st_resync_onenter,
