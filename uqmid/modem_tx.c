@@ -148,7 +148,9 @@ tx_wds_modify_profile(struct modem *modem, struct qmi_service *wds, request_cb c
 	profile_req.data.profile_identifier.profile_type = QMI_WDS_PROFILE_TYPE_3GPP;
 	profile_req.data.profile_identifier.profile_index = profile;
 	qmi_set(&profile_req, pdp_type, pdp_type);
-	qmi_set(&profile_req, pdp_type, pdp_type);
+
+	if (apn)
+		profile_req.data.apn_name = (char *) apn;
 
 	int ret = qmi_set_wds_modify_profile_request(msg, &profile_req);
 	if (ret) {
