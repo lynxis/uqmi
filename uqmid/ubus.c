@@ -321,12 +321,15 @@ modem_configure(struct ubus_context *ctx, struct ubus_object *obj,
 	blobmsg_parse(modem_configure_policy, __CFG_MAX, tb, blob_data(msg), blob_len(msg));
 	if (tb[CFG_APN]) {
 		TALLOC_FREE(modem->config.apn);
-		modem->config.apn = talloc_strdup(modem, blobmsg_get_string(tb[CFG_APN]));
-	}
+		value = blobmsg_get_string(tb[CFG_APN]);
+		if (value && strlen(value))
+			modem->config.apn = talloc_strdup(modem, blobmsg_get_string(tb[CFG_APN]));	}
 
 	if (tb[CFG_PIN]) {
 		TALLOC_FREE(modem->config.pin);
-		modem->config.pin = talloc_strdup(modem, blobmsg_get_string(tb[CFG_APN]));
+		value = blobmsg_get_string(tb[CFG_PIN]);
+		if (value && strlen(value))
+			modem->config.pin = talloc_strdup(modem, blobmsg_get_string(tb[CFG_PIN]));
 	}
 
 	if (tb[CFG_ROAMING]) {
