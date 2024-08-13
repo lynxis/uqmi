@@ -140,8 +140,8 @@ static void qmi_notify_state(struct ustream *us)
 	if (us->eof || us->write_error) {
 		modem_log(qmi->modem, LOGL_ERROR, "Modem connection died! Closing modem.");
 	} else {
-		modem_log(qmi->modem, LOGL_ERROR, "Unknown modem fd state change eof: %d write_error: %d eof write down: %d. Closing modem anyways",
-			  us->eof, us->write_error, us->eof_write_done);
+		modem_log(qmi->modem, LOGL_ERROR, "Unknown modem fd state change eof: %d write_error: %d. Closing modem anyways",
+			  us->eof, us->write_error);
 	}
 
 	/* errors! */
