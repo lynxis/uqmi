@@ -1305,7 +1305,7 @@ static const struct osmo_fsm_state modem_states[] = {
 	.onenter = modem_st_configure_modem_onenter,
     },
     [MODEM_ST_CONFIGURE_KERNEL] = {
-	.in_event_mask = 0,
+	.in_event_mask = S(MODEM_EV_RX_SUCCEED),
 	.out_state_mask = S(MODEM_ST_POWERON) | S(MODEM_ST_DESTROY),
 	.name = "CONFIGURE_KERNEL",
 	.action = modem_st_configure_kernel,
