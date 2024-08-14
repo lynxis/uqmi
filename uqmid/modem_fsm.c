@@ -1046,11 +1046,14 @@ static void modem_st_start_iface(struct osmo_fsm_inst *fi, uint32_t event, void 
 	switch (event) {
 	case MODEM_EV_RX_FAILED:
 		reason = (long) data;
-		if (reason == QMI_PROTOCOL_ERROR_CALL_FAILED) {
+		switch (reason) {
+		case QMI_PROTOCOL_ERROR_CALL_FAILED:
 			fi->T = N_RESEND;
-		} else {
+			break;
+		default:
 			uqmid_modem_set_error(modem, "Start Iface/Network failed!");
 			osmo_fsm_inst_state_chg(fi, MODEM_ST_POWEROFF, 0, 0);
+			break;
 		}
 		break;
 	case MODEM_EV_RX_SUCCEED:
