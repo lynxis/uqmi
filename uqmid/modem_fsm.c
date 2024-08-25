@@ -817,7 +817,6 @@ static void
 wds_stop_network_cb(struct qmi_service *service, struct qmi_request *req, struct qmi_msg *msg)
 {
 	struct modem *modem = req->cb_data;
-	long err = 1;
 	int ret;
 
 	ret = qmi_parse_wds_stop_network_response(msg);
@@ -827,11 +826,7 @@ wds_stop_network_cb(struct qmi_service *service, struct qmi_request *req, struct
 		return;
 	}
 
-	if (ret) {
-		osmo_fsm_inst_dispatch(modem->fi, MODEM_EV_RX_SUCCEED, (void *) err);
-	} else {
-		osmo_fsm_inst_dispatch(modem->fi, MODEM_EV_RX_FAILED, (void *) err);
-	}
+	osmo_fsm_inst_dispatch(modem->fi, MODEM_EV_RX_DISABLE_AUTOCONNECT_SUCCESS, NULL);
 }
 
 static void modem_st_start_iface_onenter(struct osmo_fsm_inst *fi, uint32_t old_state)
@@ -850,6 +845,9 @@ static void modem_st_start_iface(struct osmo_fsm_inst *fi, uint32_t event, void 
 	// FIXME: abort FSM when wds is null
 
 	switch (event) {
+	case MODEM_EV_RX_DISABLE_AUTOCONNECT_SUCCESS:
+		tx_wds_start_network(modem, wds, wds_start_network_cb, modem->qmi->wds.profile_id, modem->qmi->wds.ip_family);
+		break;
 	case MODEM_EV_RX_FAILED:
 		reason = (long) data;
 		switch (reason) {
@@ -860,7 +858,7 @@ static void modem_st_start_iface(struct osmo_fsm_inst *fi, uint32_t event, void 
 			/* No effect means it already started a connection,
 			 * but we didn't got packet_data_handle out of it.
 			 */
-			tx_wds_stop_network(modem, wds, wds_stop_network_cb, NULL, &disable_autoconnect);
+			tx_wds_stop_network(modem, wds, wds_stop_network_cb, 0xffffffff, &disable_autoconnect);
 			break;
 		default:
 			uqmid_modem_set_error(modem, "Start Iface/Network failed!");
