@@ -68,6 +68,8 @@ static const struct value_string modem_event_names[] = {
 	{ MODEM_EV_RX_SUBSCRIBED,		"RX_SUBSCRIBED" },
 	{ MODEM_EV_RX_SUBSCRIBE_FAILED,		"RX_SUBSCRIBE_FAILED" },
 
+	{ MODEM_EV_RX_DISABLE_AUTOCONNECT_SUCCESS, "RX_DISABLE_AUTOCONNECT_SUCCESS"},
+
 	{ MODEM_EV_RX_FAILED,			"RX_FAILED" },
 	{ MODEM_EV_RX_SUCCEED,			"RX_SUCCEED" },
 	{ 0, NULL }
@@ -1156,7 +1158,7 @@ static const struct osmo_fsm_state modem_states[] = {
     },
     [MODEM_ST_START_IFACE] =
     {
-	.in_event_mask = S(MODEM_EV_RX_SUCCEED) | S(MODEM_EV_RX_FAILED),
+	.in_event_mask = S(MODEM_EV_RX_SUCCEED) | S(MODEM_EV_RX_FAILED) | S(MODEM_EV_RX_DISABLE_AUTOCONNECT_SUCCESS),
 	.out_state_mask =
 	S(MODEM_ST_LIVE) | S(MODEM_ST_DESTROY) | S(MODEM_ST_POWEROFF),
 	.name = "START_IFACE",
