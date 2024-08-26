@@ -109,12 +109,16 @@ proto_qmid_setup() {
 
 	# pass configuration to it
 	ubus call "uqmid.modem.$name" configure "{'apn':'$apn', 'username': '$username', 'password': '$password', 'pin': '$pin', 'roaming':'$roaming'}"
-	sleep 1
+
+	# TODO: poll every second until sim is ready for max 10 seconds
+	# fail with no modem availabil
+	sleep 10
 
 	# check if simcard is fine
 	json_load "$(ubus call "uqmid.modem.$name" dump)"
 	json_get_var state
 	json_get_var simstate
+	# use simstate as human readable to have more stable "api"
 
 	case "$simstate" in
 		1)
@@ -145,6 +149,9 @@ proto_qmid_setup() {
 			;;
 	esac
 
+	# poll here again for a state
+	# TODO: until it reaches LIVE or the FSM terminates in a failure mode
+
 	# 12 => LIVE state
 	if [ "$state" != "12" ] ; then
 		proto_notify_error "$interface" NOT_READY_YET
@@ -162,7 +169,7 @@ proto_qmid_setup() {
 	proto_set_keep 1
 
 	proto_add_ipv4_address "$ipv4_addr" "$ipv4_netmask"
-	proto_add_ipv4_route "$ipv4_gateway" "128"
+	proto_add_ipv4_route "$ipv4_gateway" "32"
 	[ "$defaultroute" = 0 ] || proto_add_ipv4_route "0.0.0.0" 0 "$gateway_4"
 
 	[ "$peerdns" = 0 ] || {
