@@ -460,6 +460,7 @@ modem_dump_state(struct ubus_context *ctx, struct ubus_object *obj,
 	BLOBMSG_ADD_STR_CHECK(&b, "iccid", modem->iccid);
 	/* session state */
 	BLOBMSG_ADD_STR_CHECK(&b, "config_apn", modem->config.apn);
+	blobmsg_add_u8(&b, "roaming", modem->config.roaming);
 	blob_add_addr(&b, "ipv4_addr", (struct sockaddr *) &modem->brearer.v4_addr);
 	blob_add_addr(&b, "ipv4_netmask", (struct sockaddr *) &modem->brearer.v4_netmask);
 	blob_add_addr(&b, "ipv4_gateway", (struct sockaddr *) &modem->brearer.v4_gateway);
