@@ -128,6 +128,7 @@ proto_qmid_setup() {
 	[ -n "$device" ] || {
 		_qdebug "No control device specified"
 		proto_notify_error "$interface" NO_DEVICE
+		proto_set_available "$interface"
 		return 1
 	}
 
@@ -187,12 +188,13 @@ proto_qmid_setup() {
 			# TODO add support for pincode/unlock
 			_qdebug "SIM REQUIRED PIN! Failing!"
 			proto_notify_error "$interface" SIM_PIN_REQUIRED
+			proto_block_restart "$interface"
 			return 1
 			;;
 		CHV_PUK)
 			_qdebug "SIM REQUIRED PUK! Failing!"
 			proto_notify_error "$interface" SIM_PUK_REQUIRED
-			proto_set_available "$interface" 0
+			proto_block_restart "$interface"
 			return 1
 			;;
 		READY)
@@ -203,6 +205,7 @@ proto_qmid_setup() {
 			_qdebug "SIM is in FAILED state. Failing!"
 			# blocked state
 			proto_notify_error "$interface" SIM_FAILED
+			proto_block_restart "$interface"
 			return 1
 			;;
 		*)
