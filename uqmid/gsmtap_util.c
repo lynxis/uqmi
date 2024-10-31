@@ -16,6 +16,8 @@
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <netinet/ip.h>
+#include <netinet/udp.h>
 #include <stdbool.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -34,9 +36,17 @@ struct t16l16v {
 
 #define GSMTAPV3_BB_DIAG_QC_QMI 1
 
+enum gsmtap_type {
+	GSMTAP_UDP,
+	GSMTAP_PCAPNG,
+};
+
 struct gsmtap_instance {
 	int fd;
 	bool valid;
+	enum gsmtap_type type;
+	/*! only valid for pcapng */
+	bool wrote_header;
 };
 
 static struct gsmtap_instance gsmtap_inst;
@@ -78,12 +88,55 @@ int gsmtap_enable(const char *gsmtap_addr)
 	return 0;
 }
 
+static void pcapng_write_header()
+{
+	gsmtap_inst.wrote_header = true;
+}
+
+
+static void pcapng_write(void *msg, size_t length)
+{
+	struct iphdr *pcaphdr = msg;
+	struct iphdr *ip = msg;
+	struct udphdr *udp = msg;
+	uint16_t total_length;
+
+	if (!gsmtap_inst.wrote_header)
+		pcapng_write_header();
+
+	total_length = length + sizeof(*udp) + sizeof(*ip);
+
+	/* FIXME: create cooked header */
+
+	/* dummy ip */
+	memset(ip, 0, sizeof(*ip));
+	ip->saddr = ip->daddr = 0x0;
+	ip->protocol = IPPROTO_UDP;
+	ip->version = IPVERSION;
+	ip->tot_len = total_length;
+
+	/* dummy udp */
+	memset(udp, 0, sizeof(*udp));
+	udp->uh_sport = udp->uh_dport = GSMTAPV3_UDP_PORT;
+	udp->uh_ulen = sizeof(*udp) + length;
+
+	write(gsmtap_inst.fd, ip, sizeof(*ip) + sizeof(*udp) + sizeof(*pcaphdr));
+	write(gsmtap_inst.fd, msg, length);
+}
+
 static void tx_gsmtap(void *msg, size_t length)
 {
 	if (!gsmtap_inst.valid)
-		return ;
+		return;
 
-	write(gsmtap_inst.fd, msg, length);
+	switch (gsmtap_inst.type) {
+	case GSMTAP_UDP:
+		write(gsmtap_inst.fd, msg, length);
+		break;
+	case GSMTAP_PCAPNG:
+		pcapng_write(msg, length);
+		break;
+	}
 }
 
 void gsmtap_send(struct modem *modem, void *data, size_t length)
