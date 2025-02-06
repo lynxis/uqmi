@@ -45,6 +45,33 @@ struct wwan_conf {
 	bool pass_through;
 };
 
+struct signal_strength {
+	struct {
+		bool valid;
+		int rssi;
+	} gsm;
+
+	struct {
+		bool valid;
+		int rssi;
+		int ecio;
+	} umts;
+
+	struct {
+		bool valid;
+		int rssi;
+		int rsrp;
+		int rsrq;
+		int snr;
+	} lte;
+
+	struct {
+		bool valid;
+		int rsrp;
+		int rsrq;
+		int snr;
+	} nr;
+};
 
 struct modem {
 	char *name;
@@ -96,6 +123,9 @@ struct modem {
 		bool ps;
 		/* if an error happened and the modem should stay off */
 		char *error;
+
+		/* signal strength */
+		struct signal_strength signal;
 	} state;
 
 	/* TODO: add multiple bearer support later */
